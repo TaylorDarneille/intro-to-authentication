@@ -16,6 +16,14 @@ Set up a new node/express app for your project 2
 5. install `express`, `ejs`, `express-ejs-layouts`, and `dotenv`.
 6. Set up your express route to successfully render a home view
 
+
+## Part 0.5 Get your database ready
+
+1. Install `pg` and `sequelize`
+2. Initialize sequelize
+3. Create a database for this app `createdb express-auth-boilerplate`
+4. Edit the`config.json` as needed
+
 ## Part 1: Creating a user
 Creating a user is what happens when you sign up on a site. In many ways, it is exactly like creating any other CRUDable resource: you submit a form, it `POST`s to a `/users` endpoint, and we INSERT INTO the users table.
 
