@@ -93,18 +93,25 @@ Let's do two things with this logged in user:
 ### Part 5a: encrypting our cookies
 Right now, there's nothing to stop someone from manually changing their userId cookie in their browser, effectively impersonating another user. To change that, we are going to encrypt the user id value using a secret string before we send it out in the cookie. And when it comes back on subsequent requests, we are going to decrypt it using the same secret string. Because no one else knows our secret string, no one can craft a cookie to impersonate another user.
 
-1. `npm i crypto-js`, `const cryptojs = require('crypto-js')`
-1. We need to encrypt cookies before they go out the door (note that this happens in 2 places!). Instead of `res.cookie('userId', user.id)`, we want:
+1. We'll use [CryptoJS](https://www.npmjs.com/package/crypto-js) to encrypt the user id via the Advanced Encryption Standard (AES). If you'd like to learn more about AES and related encryption algorithms, Computerphile has several videos about them. Here's a few to start with:
+    * [One encryptions standard to rule them all](https://youtu.be/VYech-c5Dic)
+    * [Almost all web encryption works like this](https://youtu.be/DLjzI5dX8jc)
+[CryptoJS](https://www.npmjs.com/package/crypto-js) has methods for encrypting and decrypting via AES, so we'll use it in our app.
+ `npm i crypto-js`
+2. We need to encrypt the user id _before_ we attach it to the cookie. Not that we assign the user id to the cookie in 2 places, but both of them are inside the user controller, so we'll import the package there.
+ `const cryptojs = require('crypto-js')`
+3. 
+4. Instead of `res.cookie('userId', user.id)`, we want:
 ```js
-const encryptedUserId = cryptojs.AES.encrypt(user.id.toString(), 'super secret string')
-const encryptedUserIdString = encryptedUserId.toString()
-res.cookie('userId', encryptedUserIdString)
+    const encryptedUserId = cryptojs.AES.encrypt(newUser.id.toString(), process.env.SECRET)
+    const encryptedUserIdString = encryptedUserId.toString()
+    res.cookie('userId', encryptedUserIdString)
 ```
-1. We also need to decrypt cookies as they come in the door. In our server.js, instead of just plucking the id from cookies:
+5. We also need to decrypt cookies as they come in the door (in the authentication middleware we wrote):
 ```js
-const decryptedId = cryptoJS.AES.decrypt(req.cookies.userId, 'super secret string')
-const decryptedIdString = decryptedId.toString(cryptoJS.enc.Utf8)
-const user = await models.user.findByPk(decryptedIdString)
+        const decryptedId = cryptoJS.AES.decrypt(req.cookies.userId, process.env.SECRET)
+        const decryptedIdString = decryptedId.toString(cryptoJS.enc.Utf8)
+        const user = await db.user.findByPk(decryptedIdString)
 ```
 1. We shouldn't actually have our super secret string in our code! If we commit it to github, anyone can look at it and use it to craft cookies. Instead, we should put it into a .env file to keep it secret. This works just like when we put our api keys into a .env file.
 
