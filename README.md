@@ -66,16 +66,11 @@ app.get('/someNewRoute', async (req, res) => {
 ```
 But this will get repetitive fast. Instead, we are going to `app.use` a function that looks up the user on every request. This goes in server.js as part of our middleware section:
 ```js
-app.use(async (req, res, next) => {
-  // 1
-  const userId = req.cookies.userId
-  const user = await models.user.findByPk(userId)
-
-  // 2
-  res.locals.user = user
-
-  // 3
-  next()
+// AUTHENTICATION MIDDLEWARE
+app.use(async (req, res, next)=>{
+    const user = await db.user.findByPk(req.cookies.userId)
+    res.locals.user = user
+    next()
 })
 ```
 
