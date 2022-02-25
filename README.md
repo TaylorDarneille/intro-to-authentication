@@ -134,7 +134,6 @@ else if (user.password !== req.body.password)
 else if (!bcrypt.compareSync(req.body.password, user.password))
 ```
 
-### Part 5c: understanding why we hash our passwords
 Hashing our passwords is a countermeasure in case anyone ever gains access to our db. If our users' plaintext passwords were in there, the breacher could log in as all our users and take any action (withdraw all their money, post harmful content, etc). But if all the breacher has is emails and hashed passwords, they can't log in as our users.
 
 Ok, so let's say that a breacher has our users' emails and hashed passwords. They could use brute force and compare every possible string to the hashed password until they get a match, and then they would know the user's password. For this reason, bcrypt is intentionally designed to take a long time to run (~500ms). Of course, the user will experience this delay when they log into the site, but it's not much time when you just experience it once. But someone trying to brute force every possible string will experience this delay millions of times, making it very expensive to do.
@@ -153,4 +152,7 @@ $2b$10$eKH9xXBxnEVhruGsUoDE2.PCSvwGHBf7cgkPqsXGia/O03NHNI212
 version of bcrypt  
 ```
 The purpose of a salt is: let's say that the user made a dumb password like 'Password1234'. This will probably appear in most rainbow tables. But 'Password1234eKH9xXBxnEVhruGsUoDE2.' certainly will not. This post explains the salting process well: https://stackoverflow.com/questions/6832445/how-can-bcrypt-have-built-in-salts
+
+### Part 5c: Making ensuring complex passwords: Sequelize validations
+
 
