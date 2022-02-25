@@ -116,28 +116,22 @@ Right now, there's nothing to stop someone from manually changing their userId c
 1. We shouldn't actually have our super secret string in our code! If we commit it to github, anyone can look at it and use it to craft cookies. Instead, we should put it into a .env file to keep it secret. This works just like when we put our api keys into a .env file.
 
 ### Part 5b: hashing our passwords
-Data security and breaches is a topic that some people devote their entire careers to. We are not those people. But those people advise us that we do not want to store our passwords in our db in plain text. Instead, we should hash them. Hashing is the process of convering a string into an obfuscated string. There is a key difference between hashing and encrypting: something that's been encrypted can be decrypted if you have the secret string. But something that's been hashed can _never_ be recovered into its original string. For this reason we say that hashing is _one-way_.
+Hashing is the process of convering a string into an obfuscated string. There is a key difference between hashing and encrypting: something that's been encrypted can be decrypted if you have the secret string. But something that's been hashed can _never_ be recovered into its original string. For this reason we say that hashing is _one-way_. It is mathematically impossible to reverse engineer a hashed string to it's original string. The only only way for a hacker to guess a hashed password is by brute force (aka trial and error).
 
-Here's how we will leverage this:
-1. When a user creates an account, we hash the password that they give us and store that in the db (instead of the plaintext version).
-1. On subsequent login attempts, we hash the password the user is giving us. If that hash matches the hash that we got when they created their account, we have a match! If not we have a failed login attempt.
+The key with hashing is this: The same string will produce the same hash when run through the same hashing algorithm. That means that we can hash a user's password when they sign up and store the hash in the database. Then everytime they login, we'll hash the password they entered and compare that to the hash in the db.
 
-Actual steps to achieve this:
-1. `npm i bcrypt`
-2.  When we are about to create a user, instead of saving their password, we will hash it first, and then save that hash instead of the plaintext password:
+We'll use the [bcrypt](https://www.npmjs.com/package/bcryptjs) package to hash the passwords in our app.
+0. `npm i bcrypt`
+1. Modify the signup route to hash the password before saving it in the db (you'll need to import it to use it):
 ```js
-// in our require zone
-const bcrypt = require('bcrypt')
-// right before user creation
 const hashedPassword = bcrypt.hashSync('the incoming password', 10)
-// then create the user with the hashedPassword, not the plaintext one
 ```
 3. When a user attempts to login, we will hash the password they are attempting to log in with. Then we compare the hashed version of the incoming password to the one we saved in the db when the user was created. bcrypt comes with a built in function to help us with this.
 ```js
 // replace 
-if (user.password === req.body.password)
+else if (user.password !== req.body.password)
 // with 
-if (bcrypt.compareSync(req.body.password, user.password))
+else if (!bcrypt.compareSync(req.body.password, user.password))
 ```
 
 ### Part 5c: understanding why we hash our passwords
